@@ -1,12 +1,13 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { playTurn } from "@/lib/scenario.functions";
+import { playTurn, askCoach } from "@/lib/scenario.functions";
 import { SiteHeader } from "@/components/SiteHeader";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
-import { Loader2, Scale, Star, RefreshCw } from "lucide-react";
+import { Loader2, Scale, RefreshCw, Send, Lightbulb, MessageCircle, X } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/simulator")({
   head: () => ({ meta: [{ title: "Simulator — Legal Scenario Arena" }] }),
@@ -51,7 +52,13 @@ function SimulatorPage() {
     setLoading(true);
     try {
       const res = await play({ data: {
-        scenarioId: null, setup: { topic, difficulty, jurisdiction, scenarioType },
+        scenarioId: null,
+        setup: {
+          topic: topic.trim(),
+          difficulty,
+          jurisdiction: jurisdiction.trim(),
+          scenarioType: scenarioType.trim(),
+        },
         choiceIndex: null, choiceText: null,
       }});
       setScenarioId(res.scenarioId);
@@ -112,6 +119,8 @@ function SimulatorPage() {
           <DebriefView debrief={debrief} title={title} onReset={reset} onDashboard={() => navigate({ to: "/dashboard" })} />
         )}
       </div>
+
+      {stage === "playing" && scenarioId && <Copilot scenarioId={scenarioId} />}
     </div>
   );
 }
@@ -125,12 +134,13 @@ function Setup(props: any) {
         </div>
         <div>
           <h1 className="font-serif text-2xl text-primary">Configure your scenario</h1>
-          <p className="text-sm text-muted-foreground">Pick a topic, set the stakes. The AI takes care of the rest.</p>
+          <p className="text-sm text-muted-foreground">Pick a preset or type your own. The AI takes care of the rest.</p>
         </div>
       </div>
 
       <Section label="Topic">
         <Chips options={TOPICS} value={props.topic} onChange={props.setTopic} />
+        <CustomInput placeholder="Or type a custom topic (e.g., Maritime Law, Sports Law)…" value={props.topic} presets={TOPICS} onChange={props.setTopic} />
       </Section>
 
       <Section label="Difficulty">
@@ -145,16 +155,31 @@ function Setup(props: any) {
 
       <Section label="Jurisdiction / Setting">
         <Chips options={JURISDICTIONS} value={props.jurisdiction} onChange={props.setJurisdiction} />
+        <CustomInput placeholder="Or type a custom jurisdiction (e.g., Japan, Ontario, Mars Colony Charter)…" value={props.jurisdiction} presets={JURISDICTIONS} onChange={props.setJurisdiction} />
       </Section>
 
       <Section label="Scenario Type">
         <Chips options={TYPES} value={props.scenarioType} onChange={props.setScenarioType} />
+        <CustomInput placeholder="Or type a custom scenario type (e.g., Appellate brief, Mediation)…" value={props.scenarioType} presets={TYPES} onChange={props.setScenarioType} />
       </Section>
 
-      <Button size="lg" className="mt-6 w-full sm:w-auto" onClick={props.onStart} disabled={props.loading}>
+      <Button size="lg" className="mt-6 w-full sm:w-auto" onClick={props.onStart} disabled={props.loading || !props.topic.trim() || !props.jurisdiction.trim() || !props.scenarioType.trim()}>
         {props.loading ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Drafting your case…</> : "Begin Scenario"}
       </Button>
     </Card>
+  );
+}
+
+function CustomInput({ placeholder, value, presets, onChange }: { placeholder: string; value: string; presets: string[]; onChange: (v: string) => void }) {
+  const isCustom = !presets.includes(value);
+  return (
+    <Input
+      className="mt-3"
+      placeholder={placeholder}
+      value={isCustom ? value : ""}
+      onChange={(e) => onChange(e.target.value)}
+      maxLength={80}
+    />
   );
 }
 
@@ -187,7 +212,7 @@ function Play({ title, turn, turnNumber, totalTurns, loading, onChoose, difficul
           <div className="text-xs uppercase tracking-widest text-muted-foreground">{topic} · {difficulty}</div>
           {title && <h2 className="font-serif text-2xl text-primary mt-1">{title}</h2>}
         </div>
-        <div className="text-sm text-muted-foreground">Turn {turnNumber} / ~{totalTurns}</div>
+        <div className="text-sm text-muted-foreground">Turn {turnNumber} / {totalTurns}</div>
       </div>
 
       <div className="h-1.5 rounded-full bg-secondary overflow-hidden mb-6">
@@ -250,21 +275,24 @@ function Meter({ label, value, tone }: { label: string; value: number; tone: "wa
   );
 }
 
+function ScoreBadge({ score }: { score: number }) {
+  const tone = score >= 8 ? "var(--success)" : score >= 5 ? "var(--gold)" : "var(--destructive)";
+  return (
+    <div className="inline-flex items-baseline gap-1 px-4 py-2 rounded-xl border" style={{ borderColor: tone }}>
+      <span className="font-serif text-4xl" style={{ color: tone }}>{score}</span>
+      <span className="text-muted-foreground text-sm">/ 10</span>
+    </div>
+  );
+}
+
 function DebriefView({ debrief, title, onReset, onDashboard }: { debrief: Debrief; title: string | null; onReset: () => void; onDashboard: () => void }) {
   return (
     <Card className="p-8">
       <div className="text-xs uppercase tracking-widest text-muted-foreground">Case closed</div>
       {title && <h1 className="font-serif text-3xl text-primary mt-1">{title}</h1>}
-      <div className="mt-6 flex items-center gap-6">
-        <div>
-          <div className="text-xs uppercase tracking-widest text-muted-foreground mb-1">Final Score</div>
-          <div className="flex items-center gap-1">
-            {[1,2,3,4,5].map((s) => (
-              <Star key={s} className={`h-7 w-7 ${s <= debrief.finalScore ? "fill-gold text-gold" : "text-border"}`} />
-            ))}
-            <span className="ml-2 font-serif text-2xl text-primary">{debrief.finalScore}/5</span>
-          </div>
-        </div>
+      <div className="mt-6">
+        <div className="text-xs uppercase tracking-widest text-muted-foreground mb-2">Final Score</div>
+        <ScoreBadge score={debrief.finalScore} />
       </div>
 
       <p className="mt-6 text-lg leading-relaxed">{debrief.summary}</p>
@@ -291,6 +319,93 @@ function DebriefList({ title, items, accent }: { title: string; items: string[];
         {items.length === 0 && <li className="text-muted-foreground">—</li>}
         {items.map((it, i) => (<li key={i} className="flex gap-2"><span style={{ color }}>•</span><span>{it}</span></li>))}
       </ul>
+    </div>
+  );
+}
+
+function Copilot({ scenarioId }: { scenarioId: string }) {
+  const ask = useServerFn(askCoach);
+  const [open, setOpen] = useState(false);
+  const [question, setQuestion] = useState("");
+  const [thinking, setThinking] = useState(false);
+  const [messages, setMessages] = useState<{ role: "user" | "coach"; text: string }[]>([
+    { role: "coach", text: "I am your Copilot. Ask me about legal concepts, doctrines, or what factors are worth weighing. I will NOT tell you which choice to pick, only help you think." },
+  ]);
+
+  const send = async () => {
+    const q = question.trim();
+    if (!q || thinking) return;
+    setMessages((m) => [...m, { role: "user", text: q }]);
+    setQuestion("");
+    setThinking(true);
+    try {
+      const { reply } = await ask({ data: { scenarioId, question: q } });
+      setMessages((m) => [...m, { role: "coach", text: reply }]);
+    } catch (e: any) {
+      toast.error(e.message ?? "Copilot is unavailable");
+    } finally {
+      setThinking(false);
+    }
+  };
+
+  if (!open) {
+    return (
+      <button
+        onClick={() => setOpen(true)}
+        className="fixed bottom-6 right-6 z-40 flex items-center gap-2 px-4 py-3 rounded-full shadow-[var(--shadow-elegant)] text-primary-foreground"
+        style={{ background: "var(--gradient-hero)" }}
+        aria-label="Open Copilot"
+      >
+        <Lightbulb className="h-4 w-4" />
+        <span className="text-sm font-medium">Copilot</span>
+      </button>
+    );
+  }
+
+  return (
+    <div className="fixed bottom-6 right-6 z-40 w-[min(380px,calc(100vw-2rem))] h-[min(560px,calc(100vh-6rem))] rounded-2xl border border-border bg-card shadow-[var(--shadow-elegant)] flex flex-col overflow-hidden">
+      <div className="flex items-center justify-between px-4 py-3 border-b border-border" style={{ background: "var(--gradient-hero)" }}>
+        <div className="flex items-center gap-2 text-primary-foreground">
+          <MessageCircle className="h-4 w-4" />
+          <div>
+            <div className="text-sm font-semibold">Copilot</div>
+            <div className="text-[10px] uppercase tracking-widest opacity-80">Coaches, never answers</div>
+          </div>
+        </div>
+        <button onClick={() => setOpen(false)} className="text-primary-foreground/80 hover:text-primary-foreground" aria-label="Close">
+          <X className="h-4 w-4" />
+        </button>
+      </div>
+
+      <div className="flex-1 overflow-y-auto p-4 space-y-3">
+        {messages.map((m, i) => (
+          <div key={i} className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}>
+            <div className={`max-w-[85%] text-sm leading-relaxed px-3 py-2 rounded-2xl ${m.role === "user" ? "bg-primary text-primary-foreground rounded-br-sm" : "bg-secondary text-secondary-foreground rounded-bl-sm"}`}>
+              {m.text}
+            </div>
+          </div>
+        ))}
+        {thinking && (
+          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+            <Loader2 className="h-3 w-3 animate-spin" /> Thinking…
+          </div>
+        )}
+      </div>
+
+      <form
+        onSubmit={(e) => { e.preventDefault(); send(); }}
+        className="border-t border-border p-3 flex items-center gap-2"
+      >
+        <Input
+          value={question}
+          onChange={(e) => setQuestion(e.target.value)}
+          placeholder="Ask about a concept, not the answer…"
+          disabled={thinking}
+        />
+        <Button type="submit" size="icon" disabled={thinking || !question.trim()} aria-label="Send">
+          <Send className="h-4 w-4" />
+        </Button>
+      </form>
     </div>
   );
 }
