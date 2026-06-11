@@ -13,9 +13,9 @@ const statsQuery = queryOptions({
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Legal Scenario Arena — AI-Powered Legal Reasoning Simulator" },
+      { title: "Legal Scenario Simulator — AI-Powered Legal Reasoning Simulator" },
       { name: "description", content: "Sharpen your legal judgment with branching AI scenarios. Make one decision from four, watch consequences unfold, and learn under pressure." },
-      { property: "og:title", content: "Legal Scenario Arena" },
+      { property: "og:title", content: "Legal Scenario Simulator" },
       { property: "og:description", content: "Interactive AI legal reasoning simulator. Branching scenarios, four-choice decisions, real consequences." },
     ],
   }),
@@ -41,7 +41,7 @@ function Landing() {
               Train your legal judgment, <span className="italic" style={{ color: "var(--color-accent)" }}>one decision</span> at a time.
             </h1>
             <p className="mt-6 text-lg text-muted-foreground max-w-xl">
-              Legal Scenario Arena drops you into adaptive, AI-generated cases. Read the situation, weigh four moves, and watch the story branch on every choice. Built for students, debaters, and aspiring lawyers.
+              Legal Scenario Simulator drops you into adaptive, AI-generated cases. Read the situation, weigh four moves, and watch the story branch on every choice. Built for students, debaters, and aspiring lawyers.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               <Link to="/auth">
@@ -148,7 +148,7 @@ function Landing() {
 
       <footer className="border-t border-border py-8">
         <div className="max-w-6xl mx-auto px-6 text-sm text-muted-foreground flex flex-wrap justify-between gap-3">
-          <span>© {new Date().getFullYear()} Legal Scenario Arena</span>
+          <span>© {new Date().getFullYear()} Legal Scenario Simulator</span>
           <span>Educational simulator — not legal advice.</span>
         </div>
       </footer>

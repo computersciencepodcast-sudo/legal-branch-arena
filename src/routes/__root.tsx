@@ -78,9 +78,9 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Legal Scenario Arena" },
+      { title: "Legal Scenario Simulator" },
       { name: "description", content: "AI-powered legal reasoning simulator. Branching scenarios. Four-choice decisions. Real consequences." },
-      { property: "og:title", content: "Legal Scenario Arena" },
+      { property: "og:title", content: "Legal Scenario Simulator" },
       { property: "og:description", content: "AI-powered legal reasoning simulator." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },

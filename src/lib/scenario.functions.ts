@@ -40,7 +40,7 @@ type FinalDebrief = {
 };
 
 function buildSystemPrompt(setup: z.infer<typeof SetupSchema>, turnNumber: number, totalTurns: number) {
-  return `You are the engine of "Legal Scenario Arena", an interactive legal reasoning simulator.
+  return `You are the engine of "Legal Scenario Simulator", an interactive legal reasoning simulator.
 
 PARAMETERS:
 - Topic: ${setup.topic}
@@ -268,7 +268,7 @@ B) ${current.choices[1] ?? ""}
 C) ${current.choices[2] ?? ""}
 D) ${current.choices[3] ?? ""}` : "(The scenario has not started.)";
 
-    const system = `You are the "Copilot", a Socratic legal-thinking coach inside Legal Scenario Arena.
+    const system = `You are the "Copilot", a Socratic legal-thinking coach inside Legal Scenario Simulator.
 
 YOUR PRIME RULE: NEVER tell the user which choice (A, B, C, or D) to pick. NEVER hint at the "best" answer. NEVER rank or eliminate the options. If asked directly ("which one should I pick?", "is A right?", "what's the best move?"), politely refuse and instead ask a sharpening question or surface a legal concept they may have overlooked.
 

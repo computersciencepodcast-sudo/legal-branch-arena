@@ -8,7 +8,7 @@ import { toast } from "sonner";
 import { Scale } from "lucide-react";
 
 export const Route = createFileRoute("/auth")({
-  head: () => ({ meta: [{ title: "Sign in — Legal Scenario Arena" }] }),
+  head: () => ({ meta: [{ title: "Sign in — Legal Scenario Simulator" }] }),
   component: AuthPage,
 });
 
@@ -68,7 +68,7 @@ function AuthPage() {
       <div className="hidden lg:flex flex-col justify-between p-12 text-primary-foreground" style={{ background: "var(--gradient-hero)" }}>
         <Link to="/" className="flex items-center gap-2">
           <div className="h-9 w-9 rounded-md grid place-items-center bg-white/10"><Scale className="h-5 w-5" /></div>
-          <span className="font-serif text-lg">Legal Scenario Arena</span>
+          <span className="font-serif text-lg">Legal Scenario Simulator</span>
         </Link>
         <div>
           <p className="font-serif text-4xl leading-tight">"The best lawyers don't memorize rules. They train decisions."</p>

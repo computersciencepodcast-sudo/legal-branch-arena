@@ -10,7 +10,7 @@ import { toast } from "sonner";
 import { Loader2, Scale, RefreshCw, Send, Lightbulb, MessageCircle, X } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/simulator")({
-  head: () => ({ meta: [{ title: "Simulator — Legal Scenario Arena" }] }),
+  head: () => ({ meta: [{ title: "Simulator — Legal Scenario Simulator" }] }),
   component: SimulatorPage,
 });
 

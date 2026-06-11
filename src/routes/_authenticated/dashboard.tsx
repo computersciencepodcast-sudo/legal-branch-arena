@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Star, Trophy, TrendingUp, BookOpen } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
-  head: () => ({ meta: [{ title: "Dashboard — Legal Scenario Arena" }] }),
+  head: () => ({ meta: [{ title: "Dashboard — Legal Scenario Simulator" }] }),
   component: Dashboard,
 });
 
