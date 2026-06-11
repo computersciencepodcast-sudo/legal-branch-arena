@@ -63,7 +63,7 @@ function Landing() {
               <div className="absolute -inset-4 rounded-3xl opacity-30 blur-2xl" style={{ background: "var(--gradient-hero)" }} />
               <div className="relative bg-card rounded-2xl border border-border p-6 shadow-[var(--shadow-elegant)]">
                 <div className="flex items-center justify-between text-xs">
-                  <span className="px-2 py-1 rounded bg-primary text-primary-foreground font-medium">Turn 3 / ~6</span>
+                  <span className="px-2 py-1 rounded bg-primary text-primary-foreground font-medium">Turn 3 / 6</span>
                   <span className="text-muted-foreground">Constitutional Law · Advanced</span>
                 </div>
                 <h3 className="font-serif text-xl mt-4 leading-snug">

@@ -63,7 +63,7 @@ function Dashboard() {
         </div>
 
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-8">
-          <Stat icon={Trophy} label="Avg score" value={`${avg} / 5`} />
+          <Stat icon={Trophy} label="Avg score" value={`${avg} / 10`} />
           <Stat icon={BookOpen} label="Completed" value={String(completed.length)} />
           <Stat icon={TrendingUp} label="Highest difficulty" value={highestDiff} />
           <Stat icon={Star} label="Best topic" value={best ? best.topic : "—"} />
@@ -92,10 +92,9 @@ function Dashboard() {
                   </div>
                   <div className="shrink-0 flex items-center gap-3">
                     {r.status === "completed" ? (
-                      <div className="flex items-center gap-0.5">
-                        {[1,2,3,4,5].map((s) => (
-                          <Star key={s} className={`h-4 w-4 ${s <= (r.final_score ?? 0) ? "fill-gold text-gold" : "text-border"}`} />
-                        ))}
+                      <div className="flex items-center gap-1">
+                        <Star className="h-4 w-4 fill-gold text-gold" />
+                        <span className="font-serif text-base text-primary">{r.final_score ?? 0}<span className="text-muted-foreground text-xs">/10</span></span>
                       </div>
                     ) : (
                       <span className="px-2 py-0.5 rounded text-xs bg-secondary text-secondary-foreground">In progress</span>

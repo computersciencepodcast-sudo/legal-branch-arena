@@ -60,6 +60,7 @@ RULES:
 - After 4-7 turns OR when the case naturally resolves, end the scenario with isFinal=true and a debrief.
 - Tone: intelligent, professional, concise. Avoid disclaimers and meta-commentary.
 - NEVER use em dashes (—) or en dashes (–) in any narrative, choice, role, objective, consequence, debrief, or other text. Use commas, periods, parentheses, or colons instead. This rule is strict.
+- SCORING MUST BE HONEST AND STRICT. Do NOT be lenient. Default expectation is mediocrity (4-6). Reserve 9-10 for genuinely excellent legal reasoning, sharp issue-spotting, and well-justified tradeoffs across the whole case. Give low scores (1-3) when the user made clearly poor or reckless choices. Justify the score in the debrief.
 
 OUTPUT FORMAT: Respond with STRICT JSON only — no prose, no markdown fences. Shape:
 {
@@ -77,11 +78,11 @@ OUTPUT FORMAT: Respond with STRICT JSON only — no prose, no markdown fences. S
 
 If isFinal=true, omit "choices" (or use []) and instead set debrief:
 {
-  "summary": "what ultimately happened, 2-3 sentences",
+  "summary": "what ultimately happened, 2-3 sentences, includes honest critique",
   "strongest": ["...", "..."],
   "weakest": ["...", "..."],
   "improvements": ["...", "..."],
-  "finalScore": 1-5
+  "finalScore": 1-10
 }`;
 }
 
@@ -199,7 +200,7 @@ export const playTurn = createServerFn({ method: "POST" })
       strongest: Array.isArray(ai.debrief.strongest) ? ai.debrief.strongest.map(String) : [],
       weakest: Array.isArray(ai.debrief.weakest) ? ai.debrief.weakest.map(String) : [],
       improvements: Array.isArray(ai.debrief.improvements) ? ai.debrief.improvements.map(String) : [],
-      finalScore: Math.max(1, Math.min(5, Number(ai.debrief.finalScore ?? 3))),
+      finalScore: Math.max(1, Math.min(10, Math.round(Number(ai.debrief.finalScore ?? 5)))),
     } : null;
 
     const newTurn: Turn = {
@@ -238,4 +239,68 @@ export const playTurn = createServerFn({ method: "POST" })
       isFinal,
       debrief,
     };
+  });
+
+const CoachInput = z.object({
+  scenarioId: z.string().uuid(),
+  question: z.string().min(1).max(500),
+});
+
+export const askCoach = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) => CoachInput.parse(input))
+  .handler(async ({ data, context }) => {
+    const { supabase } = context;
+    const { data: row, error } = await supabase
+      .from("scenarios").select("topic,difficulty,jurisdiction,scenario_type,title,turns")
+      .eq("id", data.scenarioId).single();
+    if (error) throw error;
+    const turns = (row.turns as Turn[]) ?? [];
+    const current = turns[turns.length - 1];
+    const contextBlock = current ? `
+CURRENT TURN:
+Narrative: ${current.narrative}
+Role: ${current.role}
+Objective: ${current.objective}
+Choices on the table:
+A) ${current.choices[0] ?? ""}
+B) ${current.choices[1] ?? ""}
+C) ${current.choices[2] ?? ""}
+D) ${current.choices[3] ?? ""}` : "(The scenario has not started.)";
+
+    const system = `You are the "Copilot", a Socratic legal-thinking coach inside Legal Scenario Arena.
+
+YOUR PRIME RULE: NEVER tell the user which choice (A, B, C, or D) to pick. NEVER hint at the "best" answer. NEVER rank or eliminate the options. If asked directly ("which one should I pick?", "is A right?", "what's the best move?"), politely refuse and instead ask a sharpening question or surface a legal concept they may have overlooked.
+
+WHAT YOU DO:
+- Clarify legal concepts, doctrines, vocabulary, and procedure in plain language.
+- Ask Socratic questions that push the user to weigh tradeoffs themselves.
+- Point out factors, stakeholders, risks, ethical duties, or precedents worth considering.
+- Keep responses under 120 words. Be warm, sharp, and concise.
+- Never use em dashes or en dashes. Use commas, periods, parentheses, or colons.
+
+SCENARIO CONTEXT:
+Title: ${row.title ?? "Untitled"}
+Topic: ${row.topic} | Difficulty: ${row.difficulty}
+Jurisdiction: ${row.jurisdiction ?? "General"} | Type: ${row.scenario_type ?? "General"}
+${contextBlock}`;
+
+    const messages = [
+      { role: "system" as const, content: system },
+      { role: "user" as const, content: data.question },
+    ];
+    const key = process.env.GROQ_API_KEY;
+    if (!key) throw new Error("GROQ_API_KEY missing");
+    const res = await fetch(GROQ_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${key}` },
+      body: JSON.stringify({ model: MODEL, messages, temperature: 0.6, max_tokens: 350 }),
+    });
+    if (!res.ok) {
+      const text = await res.text();
+      throw new Error(`Groq error ${res.status}: ${text.slice(0, 200)}`);
+    }
+    const json = await res.json();
+    const reply = String(json.choices?.[0]?.message?.content ?? "").trim();
+    return { reply };
   });
