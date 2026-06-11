@@ -63,7 +63,7 @@ function Dashboard() {
         </div>
 
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-8">
-          <Stat icon={Trophy} label="Avg score" value={`${avg} / 5`} />
+          <Stat icon={Trophy} label="Avg score" value={`${avg} / 10`} />
           <Stat icon={BookOpen} label="Completed" value={String(completed.length)} />
           <Stat icon={TrendingUp} label="Highest difficulty" value={highestDiff} />
           <Stat icon={Star} label="Best topic" value={best ? best.topic : "—"} />
