@@ -17,6 +17,7 @@ function AuthPage() {
   const [mode, setMode] = useState<"signin" | "signup">("signin");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -27,15 +28,29 @@ function AuthPage() {
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (mode === "signup") {
+      if (password.length < 6) {
+        toast.error("Password must be at least 6 characters.");
+        return;
+      }
+      if (password !== confirmPassword) {
+        toast.error("Passwords do not match.");
+        return;
+      }
+    }
     setLoading(true);
     try {
       if (mode === "signup") {
-        const { error } = await supabase.auth.signUp({
-          email, password,
-          options: { emailRedirectTo: window.location.origin },
-        });
+        const { error } = await supabase.auth.signUp({ email, password });
         if (error) throw error;
-        toast.success("Account created. You're in.");
+        // Auto-confirm is on, so a session is created immediately.
+        // Ensure we're signed in (some setups still require explicit sign-in).
+        const { data: sessionData } = await supabase.auth.getSession();
+        if (!sessionData.session) {
+          const { error: signInErr } = await supabase.auth.signInWithPassword({ email, password });
+          if (signInErr) throw signInErr;
+        }
+        toast.success("Welcome to the Arena.");
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
