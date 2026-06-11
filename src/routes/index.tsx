@@ -1,7 +1,14 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useSuspenseQuery, queryOptions } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { SiteHeader } from "@/components/SiteHeader";
-import { Scale, Gavel, Brain, Shield, Sparkles, ArrowRight } from "lucide-react";
+import { Scale, Gavel, Brain, Shield, Sparkles, ArrowRight, Users, Globe2 } from "lucide-react";
+import { getPublicStats } from "@/lib/stats.functions";
+
+const statsQuery = queryOptions({
+  queryKey: ["public-stats"],
+  queryFn: () => getPublicStats(),
+});
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -12,10 +19,12 @@ export const Route = createFileRoute("/")({
       { property: "og:description", content: "Interactive AI legal reasoning simulator. Branching scenarios, four-choice decisions, real consequences." },
     ],
   }),
+  loader: ({ context }) => context.queryClient.ensureQueryData(statsQuery),
   component: Landing,
 });
 
 function Landing() {
+  const { data: stats } = useSuspenseQuery(statsQuery);
   return (
     <div className="min-h-screen">
       <SiteHeader />
@@ -26,7 +35,7 @@ function Landing() {
           <div className="lg:col-span-7">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-border bg-card text-xs uppercase tracking-widest text-muted-foreground">
               <Sparkles className="h-3.5 w-3.5 text-gold" />
-              Powered by Groq · llama-3.1-8b-instant
+              Interactive Legal Reasoning Engine
             </div>
             <h1 className="mt-6 text-5xl md:text-6xl font-semibold leading-[1.05] text-primary">
               Train your legal judgment, <span className="italic" style={{ color: "var(--color-accent)" }}>one decision</span> at a time.
