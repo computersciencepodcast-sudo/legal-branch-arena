@@ -59,6 +59,7 @@ RULES:
 - "risk" = 0-100 estimate of current case risk. "reasoning" = 0-100 quality of user's reasoning so far.
 - After 4-7 turns OR when the case naturally resolves, end the scenario with isFinal=true and a debrief.
 - Tone: intelligent, professional, concise. Avoid disclaimers and meta-commentary.
+- NEVER use em dashes (—) or en dashes (–) in any narrative, choice, role, objective, consequence, debrief, or other text. Use commas, periods, parentheses, or colons instead. This rule is strict.
 
 OUTPUT FORMAT: Respond with STRICT JSON only — no prose, no markdown fences. Shape:
 {

@@ -1,7 +1,14 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useSuspenseQuery, queryOptions } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { SiteHeader } from "@/components/SiteHeader";
-import { Scale, Gavel, Brain, Shield, Sparkles, ArrowRight } from "lucide-react";
+import { Scale, Gavel, Brain, Shield, Sparkles, ArrowRight, Users, Globe2 } from "lucide-react";
+import { getPublicStats } from "@/lib/stats.functions";
+
+const statsQuery = queryOptions({
+  queryKey: ["public-stats"],
+  queryFn: () => getPublicStats(),
+});
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -12,10 +19,12 @@ export const Route = createFileRoute("/")({
       { property: "og:description", content: "Interactive AI legal reasoning simulator. Branching scenarios, four-choice decisions, real consequences." },
     ],
   }),
+  loader: ({ context }) => context.queryClient.ensureQueryData(statsQuery),
   component: Landing,
 });
 
 function Landing() {
+  const { data: stats } = useSuspenseQuery(statsQuery);
   return (
     <div className="min-h-screen">
       <SiteHeader />
@@ -26,7 +35,7 @@ function Landing() {
           <div className="lg:col-span-7">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-border bg-card text-xs uppercase tracking-widest text-muted-foreground">
               <Sparkles className="h-3.5 w-3.5 text-gold" />
-              Powered by Groq · llama-3.1-8b-instant
+              Interactive Legal Reasoning Engine
             </div>
             <h1 className="mt-6 text-5xl md:text-6xl font-semibold leading-[1.05] text-primary">
               Train your legal judgment, <span className="italic" style={{ color: "var(--color-accent)" }}>one decision</span> at a time.
@@ -42,10 +51,11 @@ function Landing() {
                 <Button size="lg" variant="outline">How it works</Button>
               </a>
             </div>
-            <div className="mt-10 flex items-center gap-6 text-xs text-muted-foreground">
-              <div><span className="font-semibold text-foreground">11</span> topic areas</div>
-              <div><span className="font-semibold text-foreground">4</span> difficulty levels</div>
-              <div><span className="font-semibold text-foreground">∞</span> unique cases</div>
+            <div className="mt-10 grid grid-cols-2 sm:grid-cols-4 gap-4 max-w-xl">
+              <StatPill icon={Users} label="Total users" value={stats.totalUsers.toLocaleString()} />
+              <StatPill icon={Globe2} label="Countries" value={stats.totalCountries.toLocaleString()} />
+              <StatPill icon={Gavel} label="Topic areas" value="11" />
+              <StatPill icon={Brain} label="Difficulty levels" value="4" />
             </div>
           </div>
 
@@ -156,6 +166,18 @@ function Meter({ label, value, tone }: { label: string; value: number; tone: "wa
       <div className="h-1.5 rounded-full bg-secondary overflow-hidden">
         <div className="h-full rounded-full" style={{ width: `${value}%`, background: color }} />
       </div>
+    </div>
+  );
+}
+
+function StatPill({ icon: Icon, label, value }: { icon: React.ComponentType<{ className?: string }>; label: string; value: string }) {
+  return (
+    <div className="p-3 rounded-lg border border-border bg-card/60">
+      <div className="flex items-center gap-2 text-muted-foreground text-[11px] uppercase tracking-widest">
+        <Icon className="h-3.5 w-3.5" />
+        {label}
+      </div>
+      <div className="mt-1 font-serif text-xl text-foreground">{value}</div>
     </div>
   );
 }
