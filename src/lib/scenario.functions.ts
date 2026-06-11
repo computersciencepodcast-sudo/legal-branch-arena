@@ -200,7 +200,7 @@ export const playTurn = createServerFn({ method: "POST" })
       strongest: Array.isArray(ai.debrief.strongest) ? ai.debrief.strongest.map(String) : [],
       weakest: Array.isArray(ai.debrief.weakest) ? ai.debrief.weakest.map(String) : [],
       improvements: Array.isArray(ai.debrief.improvements) ? ai.debrief.improvements.map(String) : [],
-      finalScore: Math.max(1, Math.min(5, Number(ai.debrief.finalScore ?? 3))),
+      finalScore: Math.max(1, Math.min(10, Math.round(Number(ai.debrief.finalScore ?? 5)))),
     } : null;
 
     const newTurn: Turn = {
