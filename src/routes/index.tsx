@@ -169,3 +169,15 @@ function Meter({ label, value, tone }: { label: string; value: number; tone: "wa
     </div>
   );
 }
+
+function StatPill({ icon: Icon, label, value }: { icon: React.ComponentType<{ className?: string }>; label: string; value: string }) {
+  return (
+    <div className="p-3 rounded-lg border border-border bg-card/60">
+      <div className="flex items-center gap-2 text-muted-foreground text-[11px] uppercase tracking-widest">
+        <Icon className="h-3.5 w-3.5" />
+        {label}
+      </div>
+      <div className="mt-1 font-serif text-xl text-foreground">{value}</div>
+    </div>
+  );
+}
