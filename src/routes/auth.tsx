@@ -81,7 +81,7 @@ function AuthPage() {
         <div className="w-full max-w-sm">
           <h1 className="font-serif text-3xl text-primary">{mode === "signin" ? "Welcome back" : "Create your account"}</h1>
           <p className="text-sm text-muted-foreground mt-1">
-            {mode === "signin" ? "Sign in to continue your training." : "Free, instant — no credit card."}
+            {mode === "signin" ? "Sign in to continue your training." : "Free, instant. No credit card."}
           </p>
 
           <form onSubmit={submit} className="mt-8 space-y-4">
@@ -93,6 +93,22 @@ function AuthPage() {
               <Label htmlFor="password">Password</Label>
               <Input id="password" type="password" required minLength={6} value={password} onChange={(e) => setPassword(e.target.value)} />
             </div>
+            {mode === "signup" && (
+              <div>
+                <Label htmlFor="confirmPassword">Confirm password</Label>
+                <Input
+                  id="confirmPassword"
+                  type="password"
+                  required
+                  minLength={6}
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                />
+                {confirmPassword.length > 0 && confirmPassword !== password && (
+                  <p className="text-xs text-destructive mt-1">Passwords do not match.</p>
+                )}
+              </div>
+            )}
             <Button type="submit" className="w-full" disabled={loading}>
               {loading ? "Working..." : mode === "signin" ? "Sign in" : "Create account"}
             </Button>
