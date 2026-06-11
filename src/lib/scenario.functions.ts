@@ -60,6 +60,7 @@ RULES:
 - After 4-7 turns OR when the case naturally resolves, end the scenario with isFinal=true and a debrief.
 - Tone: intelligent, professional, concise. Avoid disclaimers and meta-commentary.
 - NEVER use em dashes (—) or en dashes (–) in any narrative, choice, role, objective, consequence, debrief, or other text. Use commas, periods, parentheses, or colons instead. This rule is strict.
+- SCORING MUST BE HONEST AND STRICT. Do NOT be lenient. Default expectation is mediocrity (4-6). Reserve 9-10 for genuinely excellent legal reasoning, sharp issue-spotting, and well-justified tradeoffs across the whole case. Give low scores (1-3) when the user made clearly poor or reckless choices. Justify the score in the debrief.
 
 OUTPUT FORMAT: Respond with STRICT JSON only — no prose, no markdown fences. Shape:
 {
@@ -77,11 +78,11 @@ OUTPUT FORMAT: Respond with STRICT JSON only — no prose, no markdown fences. S
 
 If isFinal=true, omit "choices" (or use []) and instead set debrief:
 {
-  "summary": "what ultimately happened, 2-3 sentences",
+  "summary": "what ultimately happened, 2-3 sentences, includes honest critique",
   "strongest": ["...", "..."],
   "weakest": ["...", "..."],
   "improvements": ["...", "..."],
-  "finalScore": 1-5
+  "finalScore": 1-10
 }`;
 }
 
