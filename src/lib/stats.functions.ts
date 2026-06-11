@@ -5,5 +5,10 @@ export const getPublicStats = createServerFn({ method: "GET" }).handler(async ()
   const { count } = await supabaseAdmin
     .from("profiles")
     .select("*", { count: "exact", head: true });
-  return { totalUsers: count ?? 0, totalCountries: 0 };
+  const { data: countryRows } = await supabaseAdmin
+    .from("profiles")
+    .select("country")
+    .not("country", "is", null);
+  const unique = new Set((countryRows ?? []).map((r: any) => r.country).filter(Boolean));
+  return { totalUsers: count ?? 0, totalCountries: unique.size };
 });

@@ -51,11 +51,9 @@ function Landing() {
                 <Button size="lg" variant="outline">How it works</Button>
               </a>
             </div>
-            <div className="mt-10 grid grid-cols-2 sm:grid-cols-4 gap-4 max-w-xl">
+            <div className="mt-10 grid grid-cols-2 gap-4 max-w-sm">
               <StatPill icon={Users} label="Total users" value={stats.totalUsers.toLocaleString()} />
               <StatPill icon={Globe2} label="Countries" value={stats.totalCountries.toLocaleString()} />
-              <StatPill icon={Gavel} label="Topic areas" value="11" />
-              <StatPill icon={Brain} label="Difficulty levels" value="4" />
             </div>
           </div>
 
