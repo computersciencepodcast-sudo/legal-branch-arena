@@ -63,7 +63,7 @@ export function SiteHeader() {
             <Scale className="h-5 w-5" />
           </div>
           <div className="leading-tight">
-            <div className="font-serif text-lg font-semibold">Legal Scenario Arena</div>
+            <div className="font-serif text-lg font-semibold">Legal Scenario Simulator</div>
             <div className="text-[11px] uppercase tracking-widest text-muted-foreground">Reasoning Simulator</div>
           </div>
         </Link>
